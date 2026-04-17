@@ -1,0 +1,17 @@
+{
+  "name": "学位英语冲刺助手",
+  "short_name": "冲刺助手",
+  "description": "为成人本科英语冲刺设计的本地刷题与错题复习工具。",
+  "start_url": "./#/",
+  "display": "standalone",
+  "background_color": "#f6efe4",
+  "theme_color": "#0f766e",
+  "icons": [
+    {
+      "src": "assets/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

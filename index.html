@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学位英语冲刺助手</title>
+  <meta name="theme-color" content="#0f766e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="冲刺助手">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/app-icon.svg">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- 侧边栏导航 -->
+    <nav id="sidebar">
+      <div class="sidebar-header">
+        <h1 class="logo">学位英语<span>冲刺助手</span></h1>
+      </div>
+      <ul class="nav-list">
+        <li><a href="#/" data-page="dashboard" class="nav-link active">
+          <span class="nav-icon">📊</span><span class="nav-text">首页</span>
+        </a></li>
+        <li class="nav-group-label">分类练习</li>
+        <li><a href="#/practice/conversation" data-page="practice-conversation" class="nav-link">
+          <span class="nav-icon">💬</span><span class="nav-text">交际用语</span>
+          <span class="nav-badge">10分</span>
+        </a></li>
+        <li><a href="#/practice/vocab-grammar" data-page="practice-vocab-grammar" class="nav-link">
+          <span class="nav-icon">📝</span><span class="nav-text">词汇语法</span>
+          <span class="nav-badge">30分</span>
+        </a></li>
+        <li><a href="#/practice/reading" data-page="practice-reading" class="nav-link">
+          <span class="nav-icon">📖</span><span class="nav-text">阅读理解</span>
+          <span class="nav-badge">30分</span>
+        </a></li>
+        <li><a href="#/practice/cloze" data-page="practice-cloze" class="nav-link">
+          <span class="nav-icon">🔤</span><span class="nav-text">完形填空</span>
+          <span class="nav-badge">10分</span>
+        </a></li>
+        <li><a href="#/practice/translation" data-page="practice-translation" class="nav-link">
+          <span class="nav-icon">🔄</span><span class="nav-text">翻译练习</span>
+          <span class="nav-badge">20分</span>
+        </a></li>
+        <li class="nav-divider"></li>
+        <li><a href="#/wrong-book" data-page="wrong-book" class="nav-link">
+          <span class="nav-icon">❌</span><span class="nav-text">错题本</span>
+          <span class="nav-badge" id="wrong-count-badge" style="display:none">0</span>
+        </a></li>
+        <li><a href="#/flashcard" data-page="flashcard" class="nav-link">
+          <span class="nav-icon">🃏</span><span class="nav-text">速记卡</span>
+        </a></li>
+        <li><a href="#/exam" data-page="exam" class="nav-link">
+          <span class="nav-icon">⏱️</span><span class="nav-text">模拟考试</span>
+        </a></li>
+        <li><a href="#/knowledge" data-page="knowledge" class="nav-link">
+          <span class="nav-icon">📚</span><span class="nav-text">考点速查</span>
+        </a></li>
+        <li class="nav-divider"></li>
+        <li><a href="#/settings" data-page="settings" class="nav-link">
+          <span class="nav-icon">⚙️</span><span class="nav-text">设置</span>
+        </a></li>
+      </ul>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main id="main-content">
+      <div id="page-container"></div>
+    </main>
+
+    <!-- 手机端底部导航 -->
+    <nav id="bottom-nav">
+      <a href="#/" data-page="dashboard" class="bottom-nav-link active">
+        <span class="bottom-icon">📊</span><span class="bottom-text">首页</span>
+      </a>
+      <a href="#/practice/vocab-grammar" data-page="practice-vocab-grammar" class="bottom-nav-link">
+        <span class="bottom-icon">📝</span><span class="bottom-text">练习</span>
+      </a>
+      <a href="#/wrong-book" data-page="wrong-book" class="bottom-nav-link">
+        <span class="bottom-icon">❌</span><span class="bottom-text">错题</span>
+      </a>
+      <a href="#/flashcard" data-page="flashcard" class="bottom-nav-link">
+        <span class="bottom-icon">🃏</span><span class="bottom-text">速记</span>
+      </a>
+      <a href="#/knowledge" data-page="knowledge" class="bottom-nav-link">
+        <span class="bottom-icon">📚</span><span class="bottom-text">考点</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- 数据文件 -->
+  <script src="data/conversation.js"></script>
+  <script src="data/vocab-grammar.js"></script>
+  <script src="data/reading.js"></script>
+  <script src="data/cloze.js"></script>
+  <script src="data/translation.js"></script>
+  <script src="data/flashcards.js"></script>
+  <script src="data/knowledge.js"></script>
+
+  <!-- 核心逻辑 -->
+  <script src="js/utils.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/coach.js"></script>
+  <script src="js/pages/practice.js"></script>
+  <script src="js/pages/reading.js"></script>
+  <script src="js/pages/cloze.js"></script>
+  <script src="js/pages/translation.js"></script>
+  <script src="js/pages/wrong-book.js"></script>
+  <script src="js/pages/flashcard.js"></script>
+  <script src="js/pages/dashboard.js"></script>
+  <script src="js/pages/exam.js"></script>
+  <script src="js/pages/knowledge.js"></script>
+  <script src="js/pages/settings.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
