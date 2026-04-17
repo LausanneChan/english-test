@@ -252,6 +252,8 @@ var Utils = {
     var startY = 0;
     var originLeft = 0;
     var originTop = 0;
+    var pointerActive = false;
+    var activePointerId = null;
 
     function getBounds() {
       var rect = root.getBoundingClientRect();
@@ -297,7 +299,8 @@ var Utils = {
       root.style.top = nextTop + 'px';
     })();
 
-    button.addEventListener('click', function() {
+    button.addEventListener('click', function(event) {
+      event.stopPropagation();
       if (moved) return;
       var onclickName = root.getAttribute('data-onclick');
       if (onclickName) {
@@ -306,35 +309,48 @@ var Utils = {
     });
 
     root.addEventListener('pointerdown', function(event) {
+      if (event.target !== button && !button.contains(event.target)) return;
+      pointerActive = true;
+      activePointerId = event.pointerId;
       moved = false;
       startX = event.clientX;
       startY = event.clientY;
       var rect = root.getBoundingClientRect();
       originLeft = rect.left;
       originTop = rect.top;
-      if (root.setPointerCapture) root.setPointerCapture(event.pointerId);
-      root.classList.add('dragging');
     });
 
     root.addEventListener('pointermove', function(event) {
-      if (!root.classList.contains('dragging')) return;
+      if (!pointerActive || activePointerId !== event.pointerId) return;
       var deltaX = event.clientX - startX;
       var deltaY = event.clientY - startY;
-      if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
+      if (!moved && (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8)) {
         moved = true;
+        root.classList.add('dragging');
+        if (root.setPointerCapture) {
+          try { root.setPointerCapture(event.pointerId); } catch (e) {}
+        }
       }
+      if (!moved) {
+        return;
+      }
+      event.preventDefault();
       applyPosition(originLeft + deltaX, originTop + deltaY);
     });
 
     function endDrag(event) {
-      if (!root.classList.contains('dragging')) return;
-      if (root.releasePointerCapture && event && event.pointerId !== undefined) {
+      if (!pointerActive || (event && activePointerId !== null && event.pointerId !== activePointerId)) return;
+      if (root.releasePointerCapture && event && event.pointerId !== undefined && root.classList.contains('dragging')) {
         try { root.releasePointerCapture(event.pointerId); } catch (e) {}
       }
+      pointerActive = false;
+      activePointerId = null;
       root.classList.remove('dragging');
       if (moved) {
         persistPosition();
         setTimeout(function() { moved = false; }, 0);
+      } else {
+        moved = false;
       }
     }
 
