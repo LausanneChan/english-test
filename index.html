@@ -67,17 +67,45 @@
       </ul>
     </nav>
 
+    <header id="mobile-topbar">
+      <button id="mobile-menu-btn" type="button" aria-label="打开菜单">
+        <span></span><span></span><span></span>
+      </button>
+      <div id="mobile-page-title">首页</div>
+    </header>
+
+    <div id="mobile-drawer-overlay"></div>
+    <aside id="mobile-drawer">
+      <div class="mobile-drawer-header">
+        <h2>全部功能</h2>
+        <button id="mobile-drawer-close" type="button" aria-label="关闭菜单">关闭</button>
+      </div>
+      <nav class="mobile-drawer-nav">
+        <a href="#/" data-page="dashboard" class="mobile-drawer-link">首页</a>
+        <a href="#/practice/conversation" data-page="practice-conversation" class="mobile-drawer-link">交际用语</a>
+        <a href="#/practice/vocab-grammar" data-page="practice-vocab-grammar" class="mobile-drawer-link">词汇语法</a>
+        <a href="#/practice/reading" data-page="practice-reading" class="mobile-drawer-link">阅读理解</a>
+        <a href="#/practice/cloze" data-page="practice-cloze" class="mobile-drawer-link">完形填空</a>
+        <a href="#/practice/translation" data-page="practice-translation" class="mobile-drawer-link">翻译练习</a>
+        <a href="#/wrong-book" data-page="wrong-book" class="mobile-drawer-link">错题本</a>
+        <a href="#/flashcard" data-page="flashcard" class="mobile-drawer-link">速记卡</a>
+        <a href="#/exam" data-page="exam" class="mobile-drawer-link">模拟考试</a>
+        <a href="#/knowledge" data-page="knowledge" class="mobile-drawer-link">考点速查</a>
+        <a href="#/settings" data-page="settings" class="mobile-drawer-link">设置</a>
+      </nav>
+    </aside>
+
     <!-- 主内容区 -->
     <main id="main-content">
       <div id="page-container"></div>
     </main>
 
     <!-- 手机端底部导航 -->
-    <nav id="bottom-nav">
-      <a href="#/" data-page="dashboard" class="bottom-nav-link active">
-        <span class="bottom-icon">📊</span><span class="bottom-text">首页</span>
-      </a>
-      <a href="#/practice/vocab-grammar" data-page="practice-vocab-grammar" class="bottom-nav-link">
+	    <nav id="bottom-nav">
+	      <a href="#/" data-page="dashboard" class="bottom-nav-link active">
+	        <span class="bottom-icon">📊</span><span class="bottom-text">首页</span>
+	      </a>
+	      <a href="#/practice/vocab-grammar" data-page="practice-vocab-grammar" class="bottom-nav-link">
         <span class="bottom-icon">📝</span><span class="bottom-text">练习</span>
       </a>
       <a href="#/wrong-book" data-page="wrong-book" class="bottom-nav-link">
@@ -86,11 +114,14 @@
       <a href="#/flashcard" data-page="flashcard" class="bottom-nav-link">
         <span class="bottom-icon">🃏</span><span class="bottom-text">速记</span>
       </a>
-      <a href="#/knowledge" data-page="knowledge" class="bottom-nav-link">
-        <span class="bottom-icon">📚</span><span class="bottom-text">考点</span>
-      </a>
-    </nav>
-  </div>
+	      <a href="#/knowledge" data-page="knowledge" class="bottom-nav-link">
+	        <span class="bottom-icon">📚</span><span class="bottom-text">考点</span>
+	      </a>
+	      <button type="button" id="bottom-more-btn" class="bottom-nav-link bottom-nav-more">
+	        <span class="bottom-icon">☰</span><span class="bottom-text">更多</span>
+	      </button>
+	    </nav>
+	  </div>
 
   <!-- 数据文件 -->
   <script src="data/conversation.js"></script>

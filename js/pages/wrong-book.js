@@ -1,6 +1,7 @@
 /* ===== 错题本 ===== */
 var WrongBookPage = (function() {
   var currentFilter = 'all';
+  var cnOpenMap = {};
 
   function render() {
     var container = document.getElementById('page-container');
@@ -48,6 +49,10 @@ var WrongBookPage = (function() {
         html += '</div>';
 
         if (q) {
+          var showCn = !!cnOpenMap[w.questionId];
+          if (Utils.hasChineseTranslation(q)) {
+            html += '<div class="helper-actions">' + Utils.renderChineseToggle(showCn, "WrongBookPage.toggleCnById('" + w.questionId + "')") + '</div>';
+          }
           if (q.dialogue) {
             var dialogueText = q.dialogue.map(function(line) { return line.text; }).join(' ');
             html += '<div class="audio-actions">' + Utils.renderSpeakButton(dialogueText, '朗读英文') + '</div>';
@@ -56,12 +61,23 @@ var WrongBookPage = (function() {
               html += Utils.escapeHtml(line.speaker + ': ' + line.text) + ' ';
             });
             html += '</div>';
+            if (showCn) {
+              q.dialogue.forEach(function(line) {
+                if (line.cn) html += '<div class="cn-line">' + Utils.escapeHtml(line.cn) + '</div>';
+              });
+            }
           } else if (q.question) {
             html += '<div class="audio-actions">' + Utils.renderSpeakButton(q.question, '朗读英文') + '</div>';
             html += '<div class="wrong-item-text">' + Utils.escapeHtml(q.question) + '</div>';
+            if (showCn && q.questionCn) {
+              html += '<div class="cn-block">' + Utils.escapeHtml(q.questionCn) + '</div>';
+            }
           } else if (q.source) {
             html += '<div class="audio-actions">' + Utils.renderSpeakButton(q.source, '朗读英文') + '</div>';
             html += '<div class="wrong-item-text">' + Utils.escapeHtml(q.source) + '</div>';
+            if (showCn && q.sourceCn) {
+              html += '<div class="cn-block">' + Utils.escapeHtml(q.sourceCn) + '</div>';
+            }
           }
 
           html += '<div class="wrong-item-meta">';
@@ -107,6 +123,11 @@ var WrongBookPage = (function() {
     render();
   }
 
+  function toggleCnById(id) {
+    cnOpenMap[id] = !cnOpenMap[id];
+    render();
+  }
+
   function repractice() {
     var wrongList = Store.getWrongAnswers(currentFilter);
     var unmastered = wrongList.filter(function(w) { return !w.mastered; });
@@ -128,6 +149,7 @@ var WrongBookPage = (function() {
   return {
     render: render,
     setFilter: setFilter,
+    toggleCnById: toggleCnById,
     repractice: repractice,
     clearMastered: clearMastered
   };

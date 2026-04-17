@@ -4,6 +4,7 @@ var SettingsPage = (function() {
     var container = document.getElementById('page-container');
     var stats = Store.getStats();
     var prefs = Store.getPreferences();
+    var storageKey = Store.getStorageKey();
 
     var html = '<div class="page-header"><h2>设置</h2></div>';
 
@@ -29,6 +30,12 @@ var SettingsPage = (function() {
     html += '<div class="card-header"><span class="card-title">数据管理</span></div>';
 
     html += '<div class="settings-item">';
+    html += '<div><div class="settings-item-label">本地缓存状态</div>';
+    html += '<div class="settings-item-desc">当前设备上的学习记录、考试日期、小白模式等，都会保存在本地浏览器缓存，不会上传。缓存键名：' + storageKey + '</div></div>';
+    html += '<span class="status-badge status-local">仅本地</span>';
+    html += '</div>';
+
+    html += '<div class="settings-item">';
     html += '<div><div class="settings-item-label">导出学习数据</div>';
     html += '<div class="settings-item-desc">备份错题本、学习进度等数据</div></div>';
     html += '<button class="btn btn-sm btn-outline" onclick="SettingsPage.exportData()">导出</button>';
@@ -41,9 +48,9 @@ var SettingsPage = (function() {
     html += '</div>';
 
     html += '<div class="settings-item">';
-    html += '<div><div class="settings-item-label">清空所有数据</div>';
-    html += '<div class="settings-item-desc">删除所有学习记录，不可恢复</div></div>';
-    html += '<button class="btn btn-sm btn-error" onclick="SettingsPage.clearAll()">清空</button>';
+    html += '<div><div class="settings-item-label">一键清空本地缓存</div>';
+    html += '<div class="settings-item-desc">会清空本机上的学习记录、错题本、考试日期、练习统计和设置选项。清空后恢复到初始状态，不可恢复。</div></div>';
+    html += '<button class="btn btn-sm btn-error" onclick="SettingsPage.clearAll()">一键清空</button>';
     html += '</div>';
     html += '</div>';
 
@@ -126,9 +133,11 @@ var SettingsPage = (function() {
   function clearAll() {
     if (confirm('确定要清空所有学习数据吗？此操作不可恢复！')) {
       if (confirm('再次确认：真的要清空吗？')) {
-        Store.clearAll();
-        alert('数据已清空。');
-        render();
+        Store.clearAll().then(function() {
+          App.updateWrongBadge();
+          alert('本地缓存已清空，当前应用已恢复到初始状态。');
+          render();
+        });
       }
     }
   }

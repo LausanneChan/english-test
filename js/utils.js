@@ -115,7 +115,29 @@ var Utils = {
     var safeText = encodeURIComponent(String(text));
     return '<button class="inline-speak-btn" type="button" onclick="event.stopPropagation(); Utils.speakText(decodeURIComponent(\'' + safeText + '\'))">' +
       '<span class="speak-icon">🔊</span><span>' + Utils.escapeHtml(label || '朗读') + '</span></button>';
-    },
+  },
+
+  hasChineseTranslation: function(question) {
+    if (!question) return false;
+    if (question.questionCn || question.sourceCn || question.referenceCn || question.titleCn) return true;
+    if (question.dialogue) {
+      for (var i = 0; i < question.dialogue.length; i++) {
+        if (question.dialogue[i].cn) return true;
+      }
+    }
+    if (question.options) {
+      for (var j = 0; j < question.options.length; j++) {
+        if (question.options[j].cn) return true;
+      }
+    }
+    if (question.passageParagraphsCn && question.passageParagraphsCn.length) return true;
+    return false;
+  },
+
+  renderChineseToggle: function(isOpen, onclickName) {
+    return '<button class="cn-toggle-btn" type="button" onclick="' + onclickName + '">' +
+      (isOpen ? '收起中文' : '显示中文') + '</button>';
+  },
 
   // Create element
   createElement: function(tag, attrs, children) {

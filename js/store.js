@@ -20,27 +20,52 @@ var Store = (function() {
     }
   };
 
+  function cloneDefaultData() {
+    return JSON.parse(JSON.stringify(DEFAULT_DATA));
+  }
+
+  function normalizeData(data) {
+    var normalized = cloneDefaultData();
+    var source = data && typeof data === 'object' ? data : {};
+
+    normalized.version = source.version || normalized.version;
+    normalized.wrongAnswers = Array.isArray(source.wrongAnswers) ? source.wrongAnswers : [];
+    normalized.practiceHistory = Array.isArray(source.practiceHistory) ? source.practiceHistory : [];
+    normalized.examHistory = Array.isArray(source.examHistory) ? source.examHistory : [];
+    normalized.flashcardProgress = source.flashcardProgress && typeof source.flashcardProgress === 'object'
+      ? source.flashcardProgress
+      : {};
+
+    if (source.preferences && typeof source.preferences === 'object') {
+      normalized.preferences.beginnerMode = source.preferences.beginnerMode !== false;
+    }
+
+    if (source.stats && typeof source.stats === 'object') {
+      normalized.stats.totalStudyDays = Number(source.stats.totalStudyDays) || 0;
+      normalized.stats.totalQuestionsDone = Number(source.stats.totalQuestionsDone) || 0;
+      normalized.stats.totalCorrectCount = Number(source.stats.totalCorrectCount) || 0;
+      normalized.stats.currentStreak = Number(source.stats.currentStreak) || 0;
+      normalized.stats.lastStudyDate = source.stats.lastStudyDate || null;
+      normalized.stats.examDate = source.stats.examDate || null;
+    }
+
+    return normalized;
+  }
+
   function load() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return JSON.parse(JSON.stringify(DEFAULT_DATA));
+      if (!raw) return cloneDefaultData();
       var data = JSON.parse(raw);
-      // Merge with defaults for missing keys
-      if (!data.stats) data.stats = JSON.parse(JSON.stringify(DEFAULT_DATA.stats));
-      if (!data.wrongAnswers) data.wrongAnswers = [];
-      if (!data.practiceHistory) data.practiceHistory = [];
-      if (!data.examHistory) data.examHistory = [];
-      if (!data.flashcardProgress) data.flashcardProgress = {};
-      if (!data.preferences) data.preferences = JSON.parse(JSON.stringify(DEFAULT_DATA.preferences));
-      return data;
+      return normalizeData(data);
     } catch(e) {
-      return JSON.parse(JSON.stringify(DEFAULT_DATA));
+      return cloneDefaultData();
     }
   }
 
   function save(data) {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizeData(data)));
     } catch(e) {
       console.error('Failed to save data:', e);
     }
@@ -217,7 +242,7 @@ var Store = (function() {
 
     getPreferences: function() {
       var data = load();
-      return data.preferences || JSON.parse(JSON.stringify(DEFAULT_DATA.preferences));
+      return data.preferences || cloneDefaultData().preferences;
     },
 
     isBeginnerMode: function() {
@@ -226,7 +251,7 @@ var Store = (function() {
 
     setBeginnerMode: function(enabled) {
       var data = load();
-      if (!data.preferences) data.preferences = JSON.parse(JSON.stringify(DEFAULT_DATA.preferences));
+      if (!data.preferences) data.preferences = cloneDefaultData().preferences;
       data.preferences.beginnerMode = !!enabled;
       save(data);
     },
@@ -247,7 +272,7 @@ var Store = (function() {
     importData: function(jsonStr) {
       try {
         var data = JSON.parse(jsonStr);
-        save(data);
+        save(normalizeData(data));
         return true;
       } catch(e) {
         return false;
@@ -257,6 +282,26 @@ var Store = (function() {
     // Clear all data
     clearAll: function() {
       localStorage.removeItem(STORAGE_KEY);
+      if (window.sessionStorage) {
+        sessionStorage.removeItem(STORAGE_KEY);
+      }
+      if (window.caches && window.caches.keys) {
+        return window.caches.keys().then(function(keys) {
+          var targets = keys.filter(function(key) {
+            return key.indexOf('degree-english') !== -1 || key.indexOf('app-cache') !== -1;
+          });
+          return Promise.all(targets.map(function(key) {
+            return window.caches.delete(key);
+          }));
+        }).catch(function(err) {
+          console.warn('Failed to clear caches:', err);
+        });
+      }
+      return Promise.resolve();
+    },
+
+    getStorageKey: function() {
+      return STORAGE_KEY;
     }
   };
 })();

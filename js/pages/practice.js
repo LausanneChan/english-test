@@ -8,6 +8,7 @@ var PracticePage = (function() {
   var currentType = '';
   var tags = [];
   var selectedTag = 'all';
+  var showChinese = false;
 
   function init(type) {
     currentType = type;
@@ -16,6 +17,7 @@ var PracticePage = (function() {
     results = [];
     answered = false;
     selectedTag = 'all';
+    showChinese = false;
 
     if (type === 'conversation') {
       questions = CONVERSATION_QUESTIONS.slice();
@@ -83,6 +85,10 @@ var PracticePage = (function() {
       html += '<div class="question-tag"><span class="tag tag-primary">' + q.tag + '</span></div>';
     }
 
+    if (Utils.hasChineseTranslation(q)) {
+      html += '<div class="helper-actions">' + Utils.renderChineseToggle(showChinese, 'PracticePage.toggleChinese()') + '</div>';
+    }
+
     html += Coach.renderGuide(q.type === 'vocab_grammar' ? 'vocab_grammar' : q.type, q);
 
     // Question content
@@ -99,11 +105,17 @@ var PracticePage = (function() {
         } else {
           html += '<div class="dialogue-line"><span class="dialogue-speaker">' + line.speaker + ':</span> ' + Utils.escapeHtml(line.text) + '</div>';
         }
+        if (showChinese && line.cn) {
+          html += '<div class="cn-line">' + Utils.escapeHtml(line.cn) + '</div>';
+        }
       });
       html += '</div>';
     } else {
       html += '<div class="audio-actions">' + Utils.renderSpeakButton(q.question, '朗读题干') + '</div>';
       html += '<div class="question-text">' + Utils.escapeHtml(q.question) + '</div>';
+      if (showChinese && q.questionCn) {
+        html += '<div class="cn-block">' + Utils.escapeHtml(q.questionCn) + '</div>';
+      }
     }
 
     // Options
@@ -112,7 +124,9 @@ var PracticePage = (function() {
       html += '<button class="option-btn" data-label="' + opt.label + '" onclick="PracticePage.selectAnswer(\'' + opt.label + '\')">';
       html += '<span class="option-label">' + opt.label + '</span>';
       html += '<span class="option-content">';
-      html += '<span>' + Utils.escapeHtml(opt.text) + '</span>';
+      html += '<span><span>' + Utils.escapeHtml(opt.text) + '</span>' +
+        (showChinese && opt.cn ? '<div class="option-cn">' + Utils.escapeHtml(opt.cn) + '</div>' : '') +
+        '</span>';
       html += Utils.renderInlineSpeakButton(opt.text, '朗读选项');
       html += '</span>';
       html += '</button>';
@@ -242,7 +256,13 @@ var PracticePage = (function() {
     currentIndex = 0;
     results = [];
     answered = false;
+    showChinese = false;
     startTime = Date.now();
+    render();
+  }
+
+  function toggleChinese() {
+    showChinese = !showChinese;
     render();
   }
 
@@ -264,6 +284,7 @@ var PracticePage = (function() {
     init: init,
     selectAnswer: selectAnswer,
     next: next,
-    filterByTag: filterByTag
+    filterByTag: filterByTag,
+    toggleChinese: toggleChinese
   };
 })();

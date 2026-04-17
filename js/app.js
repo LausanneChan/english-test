@@ -2,6 +2,19 @@
 var App = (function() {
   var routes = {};
   var LOCAL_HOSTS = ['localhost', '127.0.0.1'];
+  var pageTitles = {
+    '/': '首页',
+    '/practice/conversation': '交际用语',
+    '/practice/vocab-grammar': '词汇语法',
+    '/practice/reading': '阅读理解',
+    '/practice/cloze': '完形填空',
+    '/practice/translation': '翻译练习',
+    '/wrong-book': '错题本',
+    '/flashcard': '速记卡',
+    '/exam': '模拟考试',
+    '/knowledge': '考点速查',
+    '/settings': '设置'
+  };
 
   function init() {
     // Define routes
@@ -22,6 +35,7 @@ var App = (function() {
     // Listen for hash changes
     window.addEventListener('hashchange', handleRoute);
     document.addEventListener('click', handleInternalLinkClick);
+    bindMobileShell();
 
     prepareRuntime().then(function() {
       // Initial route
@@ -42,6 +56,8 @@ var App = (function() {
 
     // Update navigation active state
     updateNavActive(hash);
+    updateMobileTitle(hash);
+    closeMobileDrawer();
 
     if (handler) {
       handler();
@@ -112,6 +128,50 @@ var App = (function() {
         link.classList.add('active');
       }
     });
+
+    document.querySelectorAll('#mobile-drawer .mobile-drawer-link').forEach(function(link) {
+      var page = link.getAttribute('data-page');
+      link.classList.remove('active');
+      if (hash === getRouteForDataPage(page)) {
+        link.classList.add('active');
+      }
+    });
+  }
+
+	  function bindMobileShell() {
+	    var btn = document.getElementById('mobile-menu-btn');
+	    var closeBtn = document.getElementById('mobile-drawer-close');
+	    var overlay = document.getElementById('mobile-drawer-overlay');
+	    var bottomMoreBtn = document.getElementById('bottom-more-btn');
+	    if (btn) btn.addEventListener('click', toggleMobileDrawer);
+	    if (closeBtn) closeBtn.addEventListener('click', closeMobileDrawer);
+	    if (overlay) overlay.addEventListener('click', closeMobileDrawer);
+	    if (bottomMoreBtn) bottomMoreBtn.addEventListener('click', toggleMobileDrawer);
+	  }
+
+  function updateMobileTitle(hash) {
+    var titleEl = document.getElementById('mobile-page-title');
+    if (titleEl) {
+      titleEl.textContent = pageTitles[hash] || '学位英语冲刺助手';
+    }
+  }
+
+  function toggleMobileDrawer() {
+    var drawer = document.getElementById('mobile-drawer');
+    var overlay = document.getElementById('mobile-drawer-overlay');
+    if (!drawer || !overlay) return;
+    var isOpen = drawer.classList.contains('open');
+    drawer.classList.toggle('open', !isOpen);
+    overlay.classList.toggle('open', !isOpen);
+    document.body.classList.toggle('drawer-open', !isOpen);
+  }
+
+  function closeMobileDrawer() {
+    var drawer = document.getElementById('mobile-drawer');
+    var overlay = document.getElementById('mobile-drawer-overlay');
+    if (drawer) drawer.classList.remove('open');
+    if (overlay) overlay.classList.remove('open');
+    document.body.classList.remove('drawer-open');
   }
 
   function getRouteForDataPage(page) {

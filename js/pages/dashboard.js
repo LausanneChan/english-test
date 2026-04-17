@@ -70,14 +70,16 @@ var DashboardPage = (function() {
     html += '<div class="dashboard-section-title">快速开始</div>';
     html += '<div class="quick-actions">';
     html += '<a href="#/practice/conversation" class="quick-action"><h4>💬 交际用语</h4><p>10分送分题，必须拿满</p></a>';
-    html += '<a href="#/practice/vocab-grammar" class="quick-action"><h4>📝 词汇语法</h4><p>30分大头，按考点练习</p></a>';
-    html += '<a href="#/practice/reading" class="quick-action"><h4>📖 阅读理解</h4><p>30分，练习定位技巧</p></a>';
-    html += '<a href="#/practice/translation" class="quick-action"><h4>🔄 翻译练习</h4><p>20分，背模板拿基础分</p></a>';
-    html += '<a href="#/wrong-book" class="quick-action"><h4>❌ 错题本</h4><p>' + wrongCount + '道错题待复习</p></a>';
-    html += '<a href="#/flashcard" class="quick-action"><h4>🃏 速记卡</h4><p>碎片时间背考点</p></a>';
-    html += '<a href="#/exam" class="quick-action"><h4>⏱️ 模拟考试</h4><p>限时模拟，检验水平</p></a>';
-    html += '<a href="#/knowledge" class="quick-action"><h4>📚 考点速查</h4><p>高频语法和词汇速查</p></a>';
-    html += '</div></div>';
+	    html += '<a href="#/practice/vocab-grammar" class="quick-action"><h4>📝 词汇语法</h4><p>30分大头，按考点练习</p></a>';
+	    html += '<a href="#/practice/reading" class="quick-action"><h4>📖 阅读理解</h4><p>30分，练习定位技巧</p></a>';
+	    html += '<a href="#/practice/cloze" class="quick-action"><h4>🔤 完形填空</h4><p>10分题型，练语感和搭配</p></a>';
+	    html += '<a href="#/practice/translation" class="quick-action"><h4>🔄 翻译练习</h4><p>20分，背模板拿基础分</p></a>';
+	    html += '<a href="#/wrong-book" class="quick-action"><h4>❌ 错题本</h4><p>' + wrongCount + '道错题待复习</p></a>';
+	    html += '<a href="#/flashcard" class="quick-action"><h4>🃏 速记卡</h4><p>碎片时间背考点</p></a>';
+	    html += '<a href="#/exam" class="quick-action"><h4>⏱️ 模拟考试</h4><p>限时模拟，检验水平</p></a>';
+	    html += '<a href="#/knowledge" class="quick-action"><h4>📚 考点速查</h4><p>高频语法和词汇速查</p></a>';
+	    html += '<a href="#/settings" class="quick-action"><h4>⚙️ 设置</h4><p>考试日期、学习习惯和模式设置</p></a>';
+	    html += '</div></div>';
 
     // 60分策略
     html += '<div class="card">';

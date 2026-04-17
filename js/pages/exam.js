@@ -8,6 +8,7 @@ var ExamPage = (function() {
   var timeLeft = 0;
   var examStarted = false;
   var examMode = 'view'; // view / result
+  var showChinese = false;
 
   function render() {
     var container = document.getElementById('page-container');
@@ -65,6 +66,7 @@ var ExamPage = (function() {
     currentIndex = 0;
     answered = false;
     timeLeft = 90 * 60; // 90 minutes
+    showChinese = false;
 
     // Build question set
     questions = [];
@@ -80,7 +82,7 @@ var ExamPage = (function() {
     if (READING_QUESTIONS.length > 0) {
       var rp = READING_QUESTIONS[Math.floor(Math.random() * READING_QUESTIONS.length)];
       questions = questions.concat(Utils.shuffle(rp.questions).slice(0, 5).map(function(q) {
-        return Object.assign({}, q, { _examType: 'reading', _examScore: 2, _passageTitle: rp.title, _passageParagraphs: rp.passageParagraphs });
+        return Object.assign({}, q, { _examType: 'reading', _examScore: 2, _passageTitle: rp.title, _passageParagraphs: rp.passageParagraphs, _passageParagraphsCn: rp.passageParagraphsCn });
       }));
     }
     // 10 translation (5 en2cn + 5 cn2en)
@@ -148,13 +150,19 @@ var ExamPage = (function() {
 
     // Question type label
     html += '<span class="tag tag-primary mb-8">' + typeLabels[q._examType] + '</span>';
+    if (Utils.hasChineseTranslation(q) || q._passageParagraphsCn) {
+      html += '<div class="helper-actions">' + Utils.renderChineseToggle(showChinese, 'ExamPage.toggleChinese()') + '</div>';
+    }
 
     // Passage for reading
     if (q._examType === 'reading' && q._passageParagraphs) {
       html += '<div class="audio-actions">' + Utils.renderSpeakButton(q._passageParagraphs.join(' '), '朗读短文') + '</div>';
       html += '<div class="passage-text">';
-      q._passageParagraphs.forEach(function(p) {
+      q._passageParagraphs.forEach(function(p, idx) {
         html += '<p style="margin-bottom:8px;">' + Utils.escapeHtml(p) + '</p>';
+        if (showChinese && q._passageParagraphsCn && q._passageParagraphsCn[idx]) {
+          html += '<div class="cn-line mb-8">' + Utils.escapeHtml(q._passageParagraphsCn[idx]) + '</div>';
+        }
       });
       html += '</div>';
     }
@@ -176,6 +184,9 @@ var ExamPage = (function() {
     } else if (q._examType === 'translation') {
       html += '<div class="audio-actions">' + Utils.renderSpeakButton(q.direction === 'en2cn' ? q.source : q.reference, '朗读英文') + '</div>';
       html += '<div class="translation-source">' + Utils.escapeHtml(q.source) + '</div>';
+      if (showChinese && q.sourceCn) {
+        html += '<div class="cn-block">' + Utils.escapeHtml(q.sourceCn) + '</div>';
+      }
       if (q.hints) {
         html += '<div class="translation-hints">';
         q.hints.forEach(function(h) { html += '<span class="hint-tag">' + Utils.escapeHtml(h) + '</span>'; });
@@ -189,6 +200,9 @@ var ExamPage = (function() {
     } else {
       html += '<div class="audio-actions">' + Utils.renderSpeakButton(q.question, '朗读题目') + '</div>';
       html += '<div class="question-text">' + Utils.escapeHtml(q.question) + '</div>';
+      if (showChinese && q.questionCn) {
+        html += '<div class="cn-block">' + Utils.escapeHtml(q.questionCn) + '</div>';
+      }
     }
 
     // Options (for non-translation)
@@ -197,7 +211,7 @@ var ExamPage = (function() {
       q.options.forEach(function(opt) {
         var answeredClass = answers[q.id] === opt.label ? ' selected' : '';
         html += '<button class="option-btn' + answeredClass + '" data-label="' + opt.label + '" onclick="ExamPage.selectAnswer(\'' + opt.label + '\')">';
-        html += '<span class="option-label">' + opt.label + '</span><span class="option-content"><span>' + Utils.escapeHtml(opt.text) + '</span>' + Utils.renderInlineSpeakButton(opt.text, '朗读选项') + '</span></button>';
+        html += '<span class="option-label">' + opt.label + '</span><span class="option-content"><span><span>' + Utils.escapeHtml(opt.text) + '</span>' + (showChinese && opt.cn ? '<div class="option-cn">' + Utils.escapeHtml(opt.cn) + '</div>' : '') + '</span>' + Utils.renderInlineSpeakButton(opt.text, '朗读选项') + '</span></button>';
       });
       html += '</div>';
     }
@@ -252,6 +266,11 @@ var ExamPage = (function() {
   function goTo(idx) {
     if (idx < 0 || idx >= questions.length) return;
     currentIndex = idx;
+    render();
+  }
+
+  function toggleChinese() {
+    showChinese = !showChinese;
     render();
   }
 
@@ -338,6 +357,7 @@ var ExamPage = (function() {
     showTranslationRef: showTranslationRef,
     transEval: transEval,
     goTo: goTo,
+    toggleChinese: toggleChinese,
     finishExam: finishExam,
     reset: reset
   };
