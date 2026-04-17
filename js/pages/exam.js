@@ -150,10 +150,6 @@ var ExamPage = (function() {
 
     // Question type label
     html += '<span class="tag tag-primary mb-8">' + typeLabels[q._examType] + '</span>';
-    if (Utils.hasChineseTranslation(q) || q._passageParagraphsCn) {
-      html += '<div class="helper-actions">' + Utils.renderChineseToggle(showChinese, 'ExamPage.toggleChinese()') + '</div>';
-    }
-
     // Passage for reading
     if (q._examType === 'reading' && q._passageParagraphs) {
       html += '<div class="audio-actions">' + Utils.renderSpeakButton(q._passageParagraphs.join(' '), '朗读短文') + '</div>';
@@ -184,8 +180,8 @@ var ExamPage = (function() {
     } else if (q._examType === 'translation') {
       html += '<div class="audio-actions">' + Utils.renderSpeakButton(q.direction === 'en2cn' ? q.source : q.reference, '朗读英文') + '</div>';
       html += '<div class="translation-source">' + Utils.escapeHtml(q.source) + '</div>';
-      if (showChinese && q.sourceCn) {
-        html += '<div class="cn-block">' + Utils.escapeHtml(q.sourceCn) + '</div>';
+      if (showChinese && Utils.getSourceCn(q)) {
+        html += '<div class="cn-block">' + Utils.escapeHtml(Utils.getSourceCn(q)) + '</div>';
       }
       if (q.hints) {
         html += '<div class="translation-hints">';
@@ -195,13 +191,16 @@ var ExamPage = (function() {
       html += '<div class="text-center mt-16"><p class="text-secondary mb-8">先想好翻译，点击查看参考答案</p>';
       html += '<button class="btn btn-outline" onclick="ExamPage.showTranslationRef()">查看参考</button></div>';
       html += '<div id="trans-ref" class="hidden"><div class="translation-reference mt-16"><p>' + Utils.escapeHtml(q.reference) + '</p></div>';
+      if (showChinese && Utils.getReferenceCn(q) && Utils.getReferenceCn(q) !== q.reference) {
+        html += '<div class="cn-block">' + Utils.escapeHtml(Utils.getReferenceCn(q)) + '</div>';
+      }
       html += '<div class="self-eval-btns mt-8"><button class="btn btn-success btn-sm" onclick="ExamPage.transEval(true)">翻译对了</button>';
       html += '<button class="btn btn-error btn-sm" onclick="ExamPage.transEval(false)">翻译错了</button></div></div>';
     } else {
       html += '<div class="audio-actions">' + Utils.renderSpeakButton(q.question, '朗读题目') + '</div>';
       html += '<div class="question-text">' + Utils.escapeHtml(q.question) + '</div>';
-      if (showChinese && q.questionCn) {
-        html += '<div class="cn-block">' + Utils.escapeHtml(q.questionCn) + '</div>';
+      if (showChinese && Utils.getQuestionCn(q)) {
+        html += '<div class="cn-block">' + Utils.escapeHtml(Utils.getQuestionCn(q)) + '</div>';
       }
     }
 
@@ -211,7 +210,7 @@ var ExamPage = (function() {
       q.options.forEach(function(opt) {
         var answeredClass = answers[q.id] === opt.label ? ' selected' : '';
         html += '<button class="option-btn' + answeredClass + '" data-label="' + opt.label + '" onclick="ExamPage.selectAnswer(\'' + opt.label + '\')">';
-        html += '<span class="option-label">' + opt.label + '</span><span class="option-content"><span><span>' + Utils.escapeHtml(opt.text) + '</span>' + (showChinese && opt.cn ? '<div class="option-cn">' + Utils.escapeHtml(opt.cn) + '</div>' : '') + '</span>' + Utils.renderInlineSpeakButton(opt.text, '朗读选项') + '</span></button>';
+        html += '<span class="option-label">' + opt.label + '</span><span class="option-content"><span><span>' + Utils.escapeHtml(opt.text) + '</span>' + (showChinese && Utils.getOptionCn(q, opt) ? '<div class="option-cn">' + Utils.escapeHtml(Utils.getOptionCn(q, opt)) + '</div>' : '') + '</span>' + Utils.renderInlineSpeakButton(opt.text, '朗读选项') + '</span></button>';
       });
       html += '</div>';
     }
@@ -228,7 +227,12 @@ var ExamPage = (function() {
 
     html += '</div>'; // question-card
 
+    if (Utils.hasChineseTranslation(q) || q._passageParagraphsCn) {
+      html += Utils.renderFloatingChineseToggle(showChinese, 'ExamPage.toggleChinese()');
+    }
+
     container.innerHTML = html;
+    Utils.initFloatingChineseToggle();
   }
 
   function selectAnswer(label) {

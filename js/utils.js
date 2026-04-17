@@ -119,7 +119,7 @@ var Utils = {
 
   hasChineseTranslation: function(question) {
     if (!question) return false;
-    if (question.questionCn || question.sourceCn || question.referenceCn || question.titleCn) return true;
+    if (Utils.getQuestionCn(question) || Utils.getSourceCn(question) || Utils.getReferenceCn(question) || Utils.getTitleCn(question) || Utils.getPassageCn(question)) return true;
     if (question.dialogue) {
       for (var i = 0; i < question.dialogue.length; i++) {
         if (question.dialogue[i].cn) return true;
@@ -127,16 +127,219 @@ var Utils = {
     }
     if (question.options) {
       for (var j = 0; j < question.options.length; j++) {
-        if (question.options[j].cn) return true;
+        if (Utils.getOptionCn(question, question.options[j])) return true;
       }
     }
     if (question.passageParagraphsCn && question.passageParagraphsCn.length) return true;
     return false;
   },
 
+  getSupplementalQuestionCn: function(id) {
+    if (typeof SUPPLEMENTAL_TRANSLATIONS === 'undefined' || !SUPPLEMENTAL_TRANSLATIONS.questions) return '';
+    return SUPPLEMENTAL_TRANSLATIONS.questions[id] || '';
+  },
+
+  getSupplementalOptionCn: function(id, label) {
+    if (typeof SUPPLEMENTAL_TRANSLATIONS === 'undefined' || !SUPPLEMENTAL_TRANSLATIONS.options) return '';
+    var group = SUPPLEMENTAL_TRANSLATIONS.options[id];
+    return group ? (group[label] || '') : '';
+  },
+
+  getSupplementalPassageCn: function(id) {
+    if (typeof SUPPLEMENTAL_TRANSLATIONS === 'undefined' || !SUPPLEMENTAL_TRANSLATIONS.passages) return '';
+    return SUPPLEMENTAL_TRANSLATIONS.passages[id] || '';
+  },
+
+  getSupplementalTitleCn: function(id) {
+    if (typeof SUPPLEMENTAL_TRANSLATIONS === 'undefined' || !SUPPLEMENTAL_TRANSLATIONS.titles) return '';
+    return SUPPLEMENTAL_TRANSLATIONS.titles[id] || '';
+  },
+
+  getQuestionCn: function(question) {
+    if (!question) return '';
+    return question.questionCn || Utils.getSupplementalQuestionCn(question.id);
+  },
+
+  getOptionCn: function(question, option) {
+    if (!option) return '';
+    if (option.cn) return option.cn;
+    if (!question || !question.id) return '';
+    return Utils.getSupplementalOptionCn(question.id, option.label);
+  },
+
+  getSourceCn: function(question) {
+    if (!question) return '';
+    if (question.sourceCn) return question.sourceCn;
+    if (question.direction === 'en2cn' && question.reference) return question.reference;
+    return '';
+  },
+
+  getReferenceCn: function(question) {
+    if (!question) return '';
+    if (question.referenceCn) return question.referenceCn;
+    if (question.direction === 'cn2en' && question.source) return question.source;
+    if (question.direction === 'en2cn' && question.reference) return question.reference;
+    return '';
+  },
+
+  getTitleCn: function(item) {
+    if (!item) return '';
+    return item.titleCn || Utils.getSupplementalTitleCn(item.id);
+  },
+
+  getPassageParagraphCn: function(item, idx) {
+    if (!item) return '';
+    if (item.passageParagraphsCn && item.passageParagraphsCn[idx]) return item.passageParagraphsCn[idx];
+    return '';
+  },
+
+  getPassageCn: function(item) {
+    if (!item) return '';
+    if (item.passageCn) return item.passageCn;
+    return Utils.getSupplementalPassageCn(item.id);
+  },
+
   renderChineseToggle: function(isOpen, onclickName) {
     return '<button class="cn-toggle-btn" type="button" onclick="' + onclickName + '">' +
       (isOpen ? '收起中文' : '显示中文') + '</button>';
+  },
+
+  getChineseTogglePosition: function() {
+    var fallback = { side: 'right', top: 200 };
+    try {
+      var raw = localStorage.getItem('degree_english_cn_toggle_pos');
+      if (!raw) return fallback;
+      var saved = JSON.parse(raw);
+      return {
+        side: saved && saved.side === 'left' ? 'left' : 'right',
+        top: saved && typeof saved.top === 'number' ? saved.top : fallback.top
+      };
+    } catch (e) {
+      return fallback;
+    }
+  },
+
+  saveChineseTogglePosition: function(pos) {
+    try {
+      localStorage.setItem('degree_english_cn_toggle_pos', JSON.stringify({
+        side: pos && pos.side === 'left' ? 'left' : 'right',
+        top: pos && typeof pos.top === 'number' ? pos.top : 200
+      }));
+    } catch (e) {}
+  },
+
+  renderFloatingChineseToggle: function(isOpen, onclickName) {
+    var pos = Utils.getChineseTogglePosition();
+    var sideStyle = pos.side === 'left' ? 'left:12px;' : 'right:12px;';
+    return '<div id="floating-cn-toggle" class="floating-cn-toggle ' + (isOpen ? 'open' : '') + '" style="' + sideStyle + 'top:' + pos.top + 'px;" data-onclick="' + onclickName + '">' +
+      '<button class="floating-cn-toggle-btn" type="button">' +
+      '<span class="floating-cn-toggle-icon">中</span>' +
+      '<span class="floating-cn-toggle-text">' + (isOpen ? '收起中文' : '显示中文') + '</span>' +
+      '</button>' +
+      '<div class="floating-cn-toggle-tip">可拖动</div>' +
+      '</div>';
+  },
+
+  initFloatingChineseToggle: function() {
+    var root = document.getElementById('floating-cn-toggle');
+    if (!root) return;
+
+    var button = root.querySelector('.floating-cn-toggle-btn');
+    if (!button) return;
+
+    var moved = false;
+    var startX = 0;
+    var startY = 0;
+    var originLeft = 0;
+    var originTop = 0;
+
+    function getBounds() {
+      var rect = root.getBoundingClientRect();
+      return {
+        width: rect.width,
+        height: rect.height,
+        maxLeft: Math.max(12, window.innerWidth - rect.width - 12),
+        maxTop: Math.max(88, window.innerHeight - rect.height - 90)
+      };
+    }
+
+    function applyPosition(left, top) {
+      var bounds = getBounds();
+      var nextLeft = Math.max(12, Math.min(left, bounds.maxLeft));
+      var nextTop = Math.max(88, Math.min(top, bounds.maxTop));
+      root.style.left = nextLeft + 'px';
+      root.style.right = 'auto';
+      root.style.top = nextTop + 'px';
+    }
+
+    function persistPosition() {
+      var rect = root.getBoundingClientRect();
+      var side = rect.left + rect.width / 2 < window.innerWidth / 2 ? 'left' : 'right';
+      var payload = {
+        side: side,
+        top: Math.max(88, Math.round(rect.top))
+      };
+
+      if (side === 'left') {
+        root.style.left = '12px';
+        root.style.right = 'auto';
+      } else {
+        root.style.right = '12px';
+        root.style.left = 'auto';
+      }
+      root.style.top = payload.top + 'px';
+      Utils.saveChineseTogglePosition(payload);
+    }
+
+    (function clampInitialPosition() {
+      var rect = root.getBoundingClientRect();
+      var nextTop = Math.max(88, Math.min(rect.top, Math.max(88, window.innerHeight - rect.height - 90)));
+      root.style.top = nextTop + 'px';
+    })();
+
+    button.addEventListener('click', function() {
+      if (moved) return;
+      var onclickName = root.getAttribute('data-onclick');
+      if (onclickName) {
+        new Function(onclickName)();
+      }
+    });
+
+    root.addEventListener('pointerdown', function(event) {
+      moved = false;
+      startX = event.clientX;
+      startY = event.clientY;
+      var rect = root.getBoundingClientRect();
+      originLeft = rect.left;
+      originTop = rect.top;
+      if (root.setPointerCapture) root.setPointerCapture(event.pointerId);
+      root.classList.add('dragging');
+    });
+
+    root.addEventListener('pointermove', function(event) {
+      if (!root.classList.contains('dragging')) return;
+      var deltaX = event.clientX - startX;
+      var deltaY = event.clientY - startY;
+      if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
+        moved = true;
+      }
+      applyPosition(originLeft + deltaX, originTop + deltaY);
+    });
+
+    function endDrag(event) {
+      if (!root.classList.contains('dragging')) return;
+      if (root.releasePointerCapture && event && event.pointerId !== undefined) {
+        try { root.releasePointerCapture(event.pointerId); } catch (e) {}
+      }
+      root.classList.remove('dragging');
+      if (moved) {
+        persistPosition();
+        setTimeout(function() { moved = false; }, 0);
+      }
+    }
+
+    root.addEventListener('pointerup', endDrag);
+    root.addEventListener('pointercancel', endDrag);
   },
 
   // Create element

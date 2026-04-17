@@ -85,10 +85,6 @@ var PracticePage = (function() {
       html += '<div class="question-tag"><span class="tag tag-primary">' + q.tag + '</span></div>';
     }
 
-    if (Utils.hasChineseTranslation(q)) {
-      html += '<div class="helper-actions">' + Utils.renderChineseToggle(showChinese, 'PracticePage.toggleChinese()') + '</div>';
-    }
-
     html += Coach.renderGuide(q.type === 'vocab_grammar' ? 'vocab_grammar' : q.type, q);
 
     // Question content
@@ -113,8 +109,8 @@ var PracticePage = (function() {
     } else {
       html += '<div class="audio-actions">' + Utils.renderSpeakButton(q.question, '朗读题干') + '</div>';
       html += '<div class="question-text">' + Utils.escapeHtml(q.question) + '</div>';
-      if (showChinese && q.questionCn) {
-        html += '<div class="cn-block">' + Utils.escapeHtml(q.questionCn) + '</div>';
+      if (showChinese && Utils.getQuestionCn(q)) {
+        html += '<div class="cn-block">' + Utils.escapeHtml(Utils.getQuestionCn(q)) + '</div>';
       }
     }
 
@@ -125,7 +121,7 @@ var PracticePage = (function() {
       html += '<span class="option-label">' + opt.label + '</span>';
       html += '<span class="option-content">';
       html += '<span><span>' + Utils.escapeHtml(opt.text) + '</span>' +
-        (showChinese && opt.cn ? '<div class="option-cn">' + Utils.escapeHtml(opt.cn) + '</div>' : '') +
+        (showChinese && Utils.getOptionCn(q, opt) ? '<div class="option-cn">' + Utils.escapeHtml(Utils.getOptionCn(q, opt)) + '</div>' : '') +
         '</span>';
       html += Utils.renderInlineSpeakButton(opt.text, '朗读选项');
       html += '</span>';
@@ -140,7 +136,12 @@ var PracticePage = (function() {
     html += '<span class="practice-score">已答对 <strong>' + correctCount + '</strong> / ' + results.length + ' 题</span>';
     html += '</div>';
 
+    if (Utils.hasChineseTranslation(q)) {
+      html += Utils.renderFloatingChineseToggle(showChinese, 'PracticePage.toggleChinese()');
+    }
+
     container.innerHTML = html;
+    Utils.initFloatingChineseToggle();
   }
 
   function selectAnswer(label) {

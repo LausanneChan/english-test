@@ -6,6 +6,7 @@ var ClozePage = (function() {
   var answered = false;
   var results = [];
   var startTime = 0;
+  var showChinese = false;
 
   function init() {
     passages = CLOZE_QUESTIONS.slice();
@@ -17,6 +18,7 @@ var ClozePage = (function() {
     answered = false;
     results = [];
     startTime = Date.now();
+    showChinese = false;
     render();
   }
 
@@ -37,7 +39,11 @@ var ClozePage = (function() {
     }
 
     var html = '<div class="page-header"><h2>完形填空</h2>';
-    html += '<p>' + passage.title + ' · 第 ' + (currentBlankIdx + 1) + ' / ' + passage.blanks.length + ' 空</p></div>';
+    html += '<p>' + passage.title + ' · 第 ' + (currentBlankIdx + 1) + ' / ' + passage.blanks.length + ' 空</p>';
+    if (showChinese && Utils.getTitleCn(passage)) {
+      html += '<div class="cn-line mt-8">' + Utils.escapeHtml(Utils.getTitleCn(passage)) + '</div>';
+    }
+    html += '</div>';
 
     // Passage with blanks
     html += '<div class="passage-text">';
@@ -67,6 +73,9 @@ var ClozePage = (function() {
       }
     });
     html += '</div>';
+    if (showChinese && Utils.getPassageCn(passage)) {
+      html += '<div class="cn-block">' + Utils.escapeHtml(Utils.getPassageCn(passage)) + '</div>';
+    }
 
     // Current blank options
     var blank = passage.blanks[currentBlankIdx];
@@ -76,11 +85,16 @@ var ClozePage = (function() {
     html += '<div class="options-list">';
     blank.options.forEach(function(opt) {
       html += '<button class="option-btn" data-label="' + opt.label + '" onclick="ClozePage.answer(\'' + opt.label + '\')">';
-      html += '<span class="option-label">' + opt.label + '</span><span class="option-content"><span>' + Utils.escapeHtml(opt.text) + '</span>' + Utils.renderInlineSpeakButton(opt.text, '朗读选项') + '</span></button>';
+      html += '<span class="option-label">' + opt.label + '</span><span class="option-content"><span><span>' + Utils.escapeHtml(opt.text) + '</span>' + (showChinese && Utils.getOptionCn({ id: passage.id + '_blank_' + blank.index }, opt) ? '<div class="option-cn">' + Utils.escapeHtml(Utils.getOptionCn({ id: passage.id + '_blank_' + blank.index }, opt)) + '</div>' : '') + '</span>' + Utils.renderInlineSpeakButton(opt.text, '朗读选项') + '</span></button>';
     });
     html += '</div></div>';
 
+    if (Utils.hasChineseTranslation(passage)) {
+      html += Utils.renderFloatingChineseToggle(showChinese, 'ClozePage.toggleChinese()');
+    }
+
     container.innerHTML = html;
+    Utils.initFloatingChineseToggle();
   }
 
   function answer(label) {
@@ -123,6 +137,11 @@ var ClozePage = (function() {
     render();
   }
 
+  function toggleChinese() {
+    showChinese = !showChinese;
+    render();
+  }
+
   function renderReport() {
     var container = document.getElementById('page-container');
     var correctCount = results.filter(function(r) { return r.correct; }).length;
@@ -145,5 +164,5 @@ var ClozePage = (function() {
       '</div></div>';
   }
 
-  return { init: init, answer: answer, next: next };
+  return { init: init, answer: answer, next: next, toggleChinese: toggleChinese };
 })();

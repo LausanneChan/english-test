@@ -29,6 +29,8 @@
   --shadow-lg: 0 24px 60px rgba(24, 32, 38, 0.14);
   --sidebar-width: 240px;
   --bottom-nav-height: 68px;
+  --mobile-topbar-height: 58px;
+  --mobile-top-offset: calc(var(--mobile-topbar-height) + env(safe-area-inset-top, 0px));
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --transition: 0.24s ease;
 }
@@ -257,7 +259,7 @@ input, textarea, select {
   top: 0;
   left: 0;
   right: 0;
-  height: calc(58px + env(safe-area-inset-top, 0px));
+  height: var(--mobile-top-offset);
   padding: env(safe-area-inset-top, 0px) 16px 0;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
@@ -849,6 +851,65 @@ input, textarea, select {
 
 .cn-toggle-btn:hover {
   background: rgba(249, 115, 22, 0.14);
+}
+
+.floating-cn-toggle {
+  position: fixed;
+  z-index: 125;
+  touch-action: none;
+  user-select: none;
+}
+
+.floating-cn-toggle.dragging {
+  transition: none;
+}
+
+.floating-cn-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(249, 115, 22, 0.18);
+  color: #9a3412;
+  box-shadow: 0 14px 28px rgba(24, 32, 38, 0.14);
+  backdrop-filter: blur(18px);
+}
+
+.floating-cn-toggle.open .floating-cn-toggle-btn {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.96), rgba(251, 146, 60, 0.92));
+  color: #fff;
+}
+
+.floating-cn-toggle-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(249, 115, 22, 0.12);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.floating-cn-toggle.open .floating-cn-toggle-icon {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.floating-cn-toggle-text {
+  font-size: 0.84rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.floating-cn-toggle-tip {
+  margin-top: 6px;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--text-light);
 }
 
 .cn-block,
@@ -1744,7 +1805,7 @@ input, textarea, select {
   #main-content {
     margin-left: 0;
     padding: 16px;
-    padding-top: calc(74px + env(safe-area-inset-top, 0px));
+    padding-top: calc(var(--mobile-top-offset) + 16px);
     padding-bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 28px);
   }
 
@@ -1767,6 +1828,19 @@ input, textarea, select {
 
   .question-card {
     padding: 18px;
+  }
+
+  .floating-cn-toggle {
+    z-index: 135;
+  }
+
+  .floating-cn-toggle-btn {
+    min-height: 44px;
+    padding: 9px 12px;
+  }
+
+  .floating-cn-toggle-text {
+    font-size: 0.8rem;
   }
 
   .dashboard-tip {
@@ -1818,12 +1892,22 @@ input, textarea, select {
 
   #main-content {
     padding: 12px;
+    padding-top: calc(var(--mobile-top-offset) + 12px);
     padding-bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 24px);
   }
 
   .option-btn {
     padding: 12px 14px;
     font-size: 0.95rem;
+  }
+
+  .floating-cn-toggle-btn {
+    gap: 6px;
+    padding: 9px 10px;
+  }
+
+  .floating-cn-toggle-text {
+    font-size: 0.76rem;
   }
 
   .self-eval-btns,

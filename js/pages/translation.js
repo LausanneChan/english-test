@@ -5,6 +5,7 @@ var TranslationPage = (function() {
   var showingReference = false;
   var results = [];
   var currentDirection = 'all';
+  var showChinese = false;
 
   function init(direction) {
     currentDirection = direction || 'all';
@@ -16,6 +17,7 @@ var TranslationPage = (function() {
     currentIndex = 0;
     showingReference = false;
     results = [];
+    showChinese = false;
     render();
   }
 
@@ -56,6 +58,9 @@ var TranslationPage = (function() {
 
     // Source text
     html += '<div class="translation-source">' + Utils.escapeHtml(q.source) + '</div>';
+    if (showChinese && Utils.getSourceCn(q) && Utils.getSourceCn(q) !== q.source) {
+      html += '<div class="cn-block">' + Utils.escapeHtml(Utils.getSourceCn(q)) + '</div>';
+    }
 
     // Hints
     if (q.hints && q.hints.length > 0) {
@@ -72,6 +77,9 @@ var TranslationPage = (function() {
       html += '<div class="translation-reference">';
       html += '<p><strong>参考答案：</strong>' + Utils.escapeHtml(q.reference) + '</p>';
       html += '</div>';
+      if (showChinese && Utils.getReferenceCn(q) && Utils.getReferenceCn(q) !== q.reference) {
+        html += '<div class="cn-block">' + Utils.escapeHtml(Utils.getReferenceCn(q)) + '</div>';
+      }
       html += Coach.renderAfterAnswer('translation', q);
 
       // Self evaluation
@@ -89,7 +97,12 @@ var TranslationPage = (function() {
 
     html += '</div>';
 
+    if (Utils.hasChineseTranslation(q)) {
+      html += Utils.renderFloatingChineseToggle(showChinese, 'TranslationPage.toggleChinese()');
+    }
+
     container.innerHTML = html;
+    Utils.initFloatingChineseToggle();
   }
 
   function showRef() {
@@ -104,6 +117,11 @@ var TranslationPage = (function() {
 
     showingReference = false;
     currentIndex++;
+    render();
+  }
+
+  function toggleChinese() {
+    showChinese = !showChinese;
     render();
   }
 
@@ -126,5 +144,5 @@ var TranslationPage = (function() {
       '</div></div>';
   }
 
-  return { init: init, showRef: showRef, selfEval: selfEval };
+  return { init: init, showRef: showRef, selfEval: selfEval, toggleChinese: toggleChinese };
 })();

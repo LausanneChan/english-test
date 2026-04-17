@@ -69,14 +69,14 @@ var WrongBookPage = (function() {
           } else if (q.question) {
             html += '<div class="audio-actions">' + Utils.renderSpeakButton(q.question, '朗读英文') + '</div>';
             html += '<div class="wrong-item-text">' + Utils.escapeHtml(q.question) + '</div>';
-            if (showCn && q.questionCn) {
-              html += '<div class="cn-block">' + Utils.escapeHtml(q.questionCn) + '</div>';
+            if (showCn && Utils.getQuestionCn(q)) {
+              html += '<div class="cn-block">' + Utils.escapeHtml(Utils.getQuestionCn(q)) + '</div>';
             }
           } else if (q.source) {
             html += '<div class="audio-actions">' + Utils.renderSpeakButton(q.source, '朗读英文') + '</div>';
             html += '<div class="wrong-item-text">' + Utils.escapeHtml(q.source) + '</div>';
-            if (showCn && q.sourceCn) {
-              html += '<div class="cn-block">' + Utils.escapeHtml(q.sourceCn) + '</div>';
+            if (showCn && Utils.getSourceCn(q)) {
+              html += '<div class="cn-block">' + Utils.escapeHtml(Utils.getSourceCn(q)) + '</div>';
             }
           }
 
@@ -200,14 +200,20 @@ var RepracticeEngine = (function() {
       } else if (q.question) {
         html += '<div class="audio-actions">' + Utils.renderSpeakButton(q.question, '朗读英文') + '</div>';
         html += '<div class="question-text">' + Utils.escapeHtml(q.question) + '</div>';
+        if (Utils.getQuestionCn(q)) {
+          html += '<div class="cn-block">' + Utils.escapeHtml(Utils.getQuestionCn(q)) + '</div>';
+        }
       } else if (q.source) {
         html += '<div class="audio-actions">' + Utils.renderSpeakButton(q.source, '朗读英文') + '</div>';
         html += '<div class="question-text">' + Utils.escapeHtml(q.source) + '</div>';
+        if (Utils.getSourceCn(q)) {
+          html += '<div class="cn-block">' + Utils.escapeHtml(Utils.getSourceCn(q)) + '</div>';
+        }
       }
       html += '<div class="options-list">';
       q.options.forEach(function(opt) {
         html += '<button class="option-btn" data-label="' + opt.label + '" onclick="RepracticeEngine.answer(\'' + opt.label + '\')">';
-        html += '<span class="option-label">' + opt.label + '</span><span class="option-content"><span>' + Utils.escapeHtml(opt.text) + '</span>' + Utils.renderInlineSpeakButton(opt.text, '朗读选项') + '</span></button>';
+        html += '<span class="option-label">' + opt.label + '</span><span class="option-content"><span><span>' + Utils.escapeHtml(opt.text) + '</span>' + (Utils.getOptionCn(q, opt) ? '<div class="option-cn">' + Utils.escapeHtml(Utils.getOptionCn(q, opt)) + '</div>' : '') + '</span>' + Utils.renderInlineSpeakButton(opt.text, '朗读选项') + '</span></button>';
       });
       html += '</div></div>';
     } else {

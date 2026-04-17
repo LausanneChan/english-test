@@ -34,19 +34,19 @@ var ReadingPage = (function() {
     var q = passage.questions[currentQuestionIndex];
 
     var html = '<div class="page-header"><h2>阅读理解</h2>';
-    html += '<p>' + passage.title + ' · 第 ' + (currentQuestionIndex + 1) + ' / ' + passage.questions.length + ' 题</p></div>';
-
-    if (Utils.hasChineseTranslation(passage) || Utils.hasChineseTranslation(q)) {
-      html += '<div class="helper-actions">' + Utils.renderChineseToggle(showChinese, 'ReadingPage.toggleChinese()') + '</div>';
+    html += '<p>' + passage.title + ' · 第 ' + (currentQuestionIndex + 1) + ' / ' + passage.questions.length + ' 题</p>';
+    if (showChinese && Utils.getTitleCn(passage)) {
+      html += '<div class="cn-line mt-8">' + Utils.escapeHtml(Utils.getTitleCn(passage)) + '</div>';
     }
+    html += '</div>';
 
     // Passage
     html += '<div class="audio-actions">' + Utils.renderSpeakButton(passage.passageParagraphs.join(' '), '朗读短文') + '</div>';
     html += '<div class="passage-text">';
     passage.passageParagraphs.forEach(function(p, idx) {
       html += '<p style="margin-bottom:12px;">' + Utils.escapeHtml(p) + '</p>';
-      if (showChinese && passage.passageParagraphsCn && passage.passageParagraphsCn[idx]) {
-        html += '<div class="cn-line mb-8">' + Utils.escapeHtml(passage.passageParagraphsCn[idx]) + '</div>';
+      if (showChinese && Utils.getPassageParagraphCn(passage, idx)) {
+        html += '<div class="cn-line mb-8">' + Utils.escapeHtml(Utils.getPassageParagraphCn(passage, idx)) + '</div>';
       }
     });
     html += '</div>';
@@ -56,17 +56,22 @@ var ReadingPage = (function() {
     html += Coach.renderGuide('reading', q);
     html += '<div class="audio-actions">' + Utils.renderSpeakButton(q.question, '朗读题目') + '</div>';
     html += '<div class="question-text">' + Utils.escapeHtml(q.question) + '</div>';
-    if (showChinese && q.questionCn) {
-      html += '<div class="cn-block">' + Utils.escapeHtml(q.questionCn) + '</div>';
+    if (showChinese && Utils.getQuestionCn(q)) {
+      html += '<div class="cn-block">' + Utils.escapeHtml(Utils.getQuestionCn(q)) + '</div>';
     }
     html += '<div class="options-list">';
     q.options.forEach(function(opt) {
       html += '<button class="option-btn" data-label="' + opt.label + '" onclick="ReadingPage.answer(\'' + opt.label + '\')">';
-      html += '<span class="option-label">' + opt.label + '</span><span class="option-content"><span><span>' + Utils.escapeHtml(opt.text) + '</span>' + (showChinese && opt.cn ? '<div class="option-cn">' + Utils.escapeHtml(opt.cn) + '</div>' : '') + '</span>' + Utils.renderInlineSpeakButton(opt.text, '朗读选项') + '</span></button>';
+      html += '<span class="option-label">' + opt.label + '</span><span class="option-content"><span><span>' + Utils.escapeHtml(opt.text) + '</span>' + (showChinese && Utils.getOptionCn(q, opt) ? '<div class="option-cn">' + Utils.escapeHtml(Utils.getOptionCn(q, opt)) + '</div>' : '') + '</span>' + Utils.renderInlineSpeakButton(opt.text, '朗读选项') + '</span></button>';
     });
     html += '</div></div>';
 
+    if (Utils.hasChineseTranslation(passage) || Utils.hasChineseTranslation(q)) {
+      html += Utils.renderFloatingChineseToggle(showChinese, 'ReadingPage.toggleChinese()');
+    }
+
     container.innerHTML = html;
+    Utils.initFloatingChineseToggle();
   }
 
   function answer(label) {
